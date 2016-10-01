@@ -43,6 +43,13 @@ function scoring(content) {
 	}
 }
 
+function euro2int(str) {
+	'use strict';
+
+	var ret = str.replace('.', '').replace('.', '');
+	return parseInt(ret, 10);
+}
+
 function callAPIFunction(username, password, action, token, func) {
 	'use strict';
 	var url, xhr;
@@ -82,6 +89,34 @@ function callAPIFunction(username, password, action, token, func) {
 	xhr.send(null);
 }
 
+function thinningSeachPanel() {
+	'use strict';
+	var dists, elem, elem2, i, val;
+
+	dists = document.getElementsByClassName('fio-infinite-item');
+	for (i = 0; i < dists.length; ++i) {
+		elem = document.getElementsByClassName('fio-infinite-item')[i];
+		elem2 = elem.getElementsByClassName('labeled-output__value')[0];
+		val = euro2int(elem2.innerHTML);
+
+		if ((profile.amount * 5) < val) {
+			elem.style.color = '#e7908e';
+
+			elem2 = elem.getElementsByClassName('fio-item-inner')[0];
+			elem2.style.borderColor = '#e7908e';
+
+			elem2 = elem.getElementsByClassName('fio-item-gallery')[0];
+			elem2.style.opacity = 0.3;
+
+			elem2 = elem.getElementsByClassName('fio-item-info')[0];
+			elem2.style.opacity = 0.3;
+
+			elem2 = elem.getElementsByClassName('btn-primary')[0];
+			elem2.style.backgroundColor = '#e7908e';
+		}
+	}
+}
+
 function injectSeachPanel() {
 	'use strict';
 	var dists, elem, token, iban, productType;
@@ -106,8 +141,7 @@ function injectSeachPanel() {
 
 				callAPIFunction(user, pass, 'accounts/' + productType + '/' + iban + '/transactions', token, function (obj) {
 					scoring(obj.content);
-
-					console.log(profile);
+					thinningSeachPanel();
 				});
 			});
 		});
