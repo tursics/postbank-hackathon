@@ -1,3 +1,57 @@
+function callAPIFunction(username, password, func) {
+	'use strict';
+	var url, xhr;
+
+//	url = 'https://hackathon.postbank.de/bank-api/gold/postbankid/token?username=' + username + '&password=' + password;
+	url = 'https://tursics.com/postbank.php?username=' + username + '&password=' + password;
+
+	xhr = new XMLHttpRequest();
+	xhr.open('POST', url);
+//	xhr.setRequestHeader('Device-Signature', '485430330021fc0f');
+//	xhr.setRequestHeader('API-Key', '485430330021fc0f');
+	xhr.onload = function (e) {
+		if (xhr.readyState === 4) {
+			if (xhr.status === 200) {
+				if ('' !== xhr.responseText) {
+					var response = JSON.parse(xhr.responseText);
+					func(response);
+				} else {
+					func({});
+				}
+			} else {
+				func({});
+			}
+		} else {
+			func({});
+		}
+	};
+	xhr.onerror = function (e) {
+		func({});
+	};
+	xhr.send(null);
+}
+
+/*
+docs: https://hackathon.postbank.de/bank-api/gold/documentation/index.html
+API key: 485430330021fc0f
+
+POSTBANKID
+
+
+
+POST
+https://hackathon.postbank.de/bank-api/gold/postbankid/token
+
+Header
+Device-Signature: 485430330021fc0f
+API-Key: 485430330021fc0f
+
+Body
+username: HackathonSep6
+username: HackathonSep7
+password: hat0814
+*/
+
 function injectSeachPanel() {
 	'use strict';
 	var dists, elem;
@@ -5,7 +59,13 @@ function injectSeachPanel() {
 	dists = document.getElementsByClassName('fio-hacked');
 	if (dists.length === 0) {
 		elem = document.getElementsByClassName('fio-search-panel')[0];
-		elem.innerHTML += '<div class="fio-hacked" style="background:#fecb00; color:#000060;">x</div>';
+		elem.innerHTML += '<div class="fio-hacked" style="background:#fecb00; color:#000060;"></div>';
+
+		callAPIFunction('HackathonSep6', 'hat0814', function (obj) {
+			elem = document.getElementsByClassName('fio-hacked')[0];
+			elem.innerHTML = 'Token: ' + obj.token;
+			console.log(obj);
+		});
 	}
 }
 
