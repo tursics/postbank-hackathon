@@ -1,6 +1,7 @@
-var user = 'HackathonSep6', // IBAN DE68100100100625019119
-//	user = 'HackathonSep7', // IBAN DE18100100100625020116
-	pass = 'hat0814';
+//var user = 'HackathonSep6', // IBAN DE68100100100625019119 <- Single
+var	user = 'HackathonSep7', // IBAN DE18100100100625020116   <- Familie
+	pass = 'hat0814',
+	profile = {};
 
 // docs: https://hackathon.postbank.de/bank-api/gold/documentation/index.html
 
@@ -10,11 +11,15 @@ var user = 'HackathonSep6', // IBAN DE68100100100625019119
 
 function scoring(content) {
 	'use strict';
-	var i, j, transaction, amount, purpose, balance = 0, children = 0, rent = 0, car = 0;
+	var i, j, transaction, amount, purpose;
+	profile.balance = 0;
+	profile.children = 0;
+	profile.rent = 0;
+	profile.car = 0;
 
 	for (i = 0; i < content.length; ++i) {
 		transaction = content[i];
-		balance = Math.max(balance, transaction.balance);
+		profile.balance = Math.max(profile.balance, transaction.balance);
 		amount = transaction.amount;
 		// transaction.bookingDate
 
@@ -25,22 +30,17 @@ function scoring(content) {
 
 		if (amount > 0) {
 //			console.log(amount+' '+transaction.currency+' '+ purpose);
-			children += purpose.indexOf('Familienkasse Kindergeld') > -1 ? 1 : 0;
+			profile.children += purpose.indexOf('Familienkasse Kindergeld') > -1 ? 1 : 0;
 		} else {
-			rent = Math.max(rent, purpose.indexOf('Miete') > -1 ? Math.abs(amount) : 0);
-			car += purpose.indexOf('Aral') > -1 ? 1 : 0;
-			car += purpose.indexOf('Shell') > -1 ? 1 : 0;
-			car += purpose.indexOf('Total') > -1 ? 1 : 0;
-			car += purpose.indexOf('Esso') > -1 ? 1 : 0;
-			car += purpose.indexOf('Avia') > -1 ? 1 : 0;
-			car += purpose.indexOf('Jet') > -1 ? 1 : 0;
+			profile.rent = Math.max(profile.rent, purpose.indexOf('Miete') > -1 ? Math.abs(amount) : 0);
+			profile.car += purpose.indexOf('Aral') > -1 ? 1 : 0;
+			profile.car += purpose.indexOf('Shell') > -1 ? 1 : 0;
+			profile.car += purpose.indexOf('Total') > -1 ? 1 : 0;
+			profile.car += purpose.indexOf('Esso') > -1 ? 1 : 0;
+			profile.car += purpose.indexOf('Avia') > -1 ? 1 : 0;
+			profile.car += purpose.indexOf('Jet') > -1 ? 1 : 0;
 		}
 	}
-
-	console.log('Balance: ' + balance);
-	console.log('Children: ' + children);
-	console.log('Rent: ' + rent);
-	console.log('Car: ' + car);
 }
 
 function callAPIFunction(username, password, action, token, func) {
@@ -89,7 +89,7 @@ function injectSeachPanel() {
 	dists = document.getElementsByClassName('fio-hacked');
 	if (dists.length === 0) {
 		elem = document.getElementsByClassName('fio-search-panel')[0];
-		elem.innerHTML += '<div class="fio-hacked" style="background:#fecb00; color:#000060; padding: 10px 10px 6px; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);">&nbsp;</div>';
+		elem.innerHTML += '<div class="fio-hacked" style="background:#fecb00; color:#000060; padding: 10px 10px 6px; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);">&nbsp;<br>&nbsp;</div>';
 
 		callAPIFunction(user, pass, 'token', '', function (obj) {
 			token = obj.token;
@@ -98,13 +98,16 @@ function injectSeachPanel() {
 				iban = obj.accounts[0].iban;
 				productType = obj.accounts[0].productType;
 
+				profile.amount = parseFloat(obj.accounts[0].amount);
+
 				elem = document.getElementsByClassName('fio-hacked')[0];
-				elem.innerHTML = 'Hallo ' + obj.name.split(' ')[0] + ', diese Immobilien empfehle ich dir:';
+				elem.innerHTML = 'Hallo ' + obj.name.split(' ')[0] + ', diese Immobilien empfehle ich dir:<br>';
+//				elem.innerHTML += '(aktueller Kontostand: ' + profile.amount.toString().replace('.', ',') + ' Euro)';
 
 				callAPIFunction(user, pass, 'accounts/' + productType + '/' + iban + '/transactions', token, function (obj) {
 					scoring(obj.content);
 
-//					console.log(obj);	
+					console.log(profile);
 				});
 			});
 		});
