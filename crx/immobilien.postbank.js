@@ -1,22 +1,56 @@
-var user = 'HackathonSep6', // 'HackathonSep7'
+var user = 'HackathonSep6', // IBAN DE68100100100625019119
+//	user = 'HackathonSep7', // IBAN DE18100100100625020116
 	pass = 'hat0814';
 
 // docs: https://hackathon.postbank.de/bank-api/gold/documentation/index.html
+
+// "Miete Wohnung Februar 2015" -620,00
+// "Stadtverwaltung, Hundesteuer 2015" -130,00
+// "Familienkasse Kindergeld Februar 2015" +184,00
+
+function scoring(content) {
+	'use strict';
+	var i, j, transaction, amount, balance = 0, purpose;
+
+	for (i = 0; i < content.length; ++i) {
+		transaction = content[i];
+		balance = Math.max(balance, transaction.balance);
+		amount = transaction.amount;
+		// transaction.bookingDate
+
+		purpose = '';
+		for (j = 0; j < transaction.purpose.length; ++j) {
+			purpose += transaction.purpose[j];
+		}
+
+		if (amount > 0) {
+//			console.log(amount+' '+transaction.currency+' '+ purpose);
+		}
+	}
+
+	console.log('Balance: ' + balance);
+}
 
 function callAPIFunction(username, password, action, token, func) {
 	'use strict';
 	var url, xhr;
 
-//	url = 'https://hackathon.postbank.de/bank-api/gold/postbankid/token?username=' + username + '&password=' + password + '&action=' + action + '&token=' + token;
-	url = 'https://tursics.com/postbank.php?username=' + username + '&password=' + password + '&action=' + action + '&token=' + token;
+	url = 'https://hackathon.postbank.de/bank-api/gold/postbankid/' + action + '?username=' + username + '&password=' + password;
 
 	xhr = new XMLHttpRequest();
-	xhr.open('GET', url);
-//	xhr.setRequestHeader('Device-Signature', '485430330021fc0f');
-//	xhr.setRequestHeader('API-Key', '485430330021fc0f');
+	if ('token' !== action) {
+		xhr.open('GET', url);
+	} else {
+		xhr.open('POST', url);
+	}
+	xhr.setRequestHeader('Device-Signature', '485430330021fc0f');
+	xhr.setRequestHeader('API-Key', '485430330021fc0f');
+	if ('token' !== action) {
+		xhr.setRequestHeader('X-Auth', token);
+	}
 	xhr.onload = function (e) {
 		if (xhr.readyState === 4) {
-			if (xhr.status === 200) {
+			if (xhr.status < 400) {
 				if ('' !== xhr.responseText) {
 					var response = JSON.parse(xhr.responseText);
 					func(response);
@@ -38,23 +72,28 @@ function callAPIFunction(username, password, action, token, func) {
 
 function injectSeachPanel() {
 	'use strict';
-	var dists, elem, token;
+	var dists, elem, token, iban, productType;
 
 	dists = document.getElementsByClassName('fio-hacked');
 	if (dists.length === 0) {
 		elem = document.getElementsByClassName('fio-search-panel')[0];
-		elem.innerHTML += '<div class="fio-hacked" style="background:#fecb00; color:#000060; padding: 10px 10px 6px; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);"></div>';
+		elem.innerHTML += '<div class="fio-hacked" style="background:#fecb00; color:#000060; padding: 10px 10px 6px; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);">&nbsp;</div>';
 
 		callAPIFunction(user, pass, 'token', '', function (obj) {
 			token = obj.token;
 
 			callAPIFunction(user, pass, '', token, function (obj) { // '' meens 'customer-resource'
+				iban = obj.accounts[0].iban;
+				productType = obj.accounts[0].productType;
+
 				elem = document.getElementsByClassName('fio-hacked')[0];
 				elem.innerHTML = 'Hallo ' + obj.name.split(' ')[0] + ', diese Immobilien empfehle ich dir:';
 
-				console.log('IBAN: '+obj.accounts[0].iban);
-				console.log('Amount: '+obj.accounts[0].amount);
-				console.log(obj);
+				callAPIFunction(user, pass, 'accounts/' + productType + '/' + iban + '/transactions', token, function (obj) {
+					scoring(obj.content);
+
+//					console.log(obj);	
+				});
 			});
 		});
 	}
