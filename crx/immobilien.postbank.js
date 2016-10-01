@@ -1,12 +1,17 @@
-function callAPIFunction(username, password, func) {
+var user = 'HackathonSep6', // 'HackathonSep7'
+	pass = 'hat0814';
+
+// docs: https://hackathon.postbank.de/bank-api/gold/documentation/index.html
+
+function callAPIFunction(username, password, action, token, func) {
 	'use strict';
 	var url, xhr;
 
-//	url = 'https://hackathon.postbank.de/bank-api/gold/postbankid/token?username=' + username + '&password=' + password;
-	url = 'https://tursics.com/postbank.php?username=' + username + '&password=' + password;
+//	url = 'https://hackathon.postbank.de/bank-api/gold/postbankid/token?username=' + username + '&password=' + password + '&action=' + action + '&token=' + token;
+	url = 'https://tursics.com/postbank.php?username=' + username + '&password=' + password + '&action=' + action + '&token=' + token;
 
 	xhr = new XMLHttpRequest();
-	xhr.open('POST', url);
+	xhr.open('GET', url);
 //	xhr.setRequestHeader('Device-Signature', '485430330021fc0f');
 //	xhr.setRequestHeader('API-Key', '485430330021fc0f');
 	xhr.onload = function (e) {
@@ -31,40 +36,26 @@ function callAPIFunction(username, password, func) {
 	xhr.send(null);
 }
 
-/*
-docs: https://hackathon.postbank.de/bank-api/gold/documentation/index.html
-API key: 485430330021fc0f
-
-POSTBANKID
-
-
-
-POST
-https://hackathon.postbank.de/bank-api/gold/postbankid/token
-
-Header
-Device-Signature: 485430330021fc0f
-API-Key: 485430330021fc0f
-
-Body
-username: HackathonSep6
-username: HackathonSep7
-password: hat0814
-*/
-
 function injectSeachPanel() {
 	'use strict';
-	var dists, elem;
+	var dists, elem, token;
 
 	dists = document.getElementsByClassName('fio-hacked');
 	if (dists.length === 0) {
 		elem = document.getElementsByClassName('fio-search-panel')[0];
-		elem.innerHTML += '<div class="fio-hacked" style="background:#fecb00; color:#000060;"></div>';
+		elem.innerHTML += '<div class="fio-hacked" style="background:#fecb00; color:#000060; padding: 10px 10px 6px; font-size: 14px; font-weight: bold; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);"></div>';
 
-		callAPIFunction('HackathonSep6', 'hat0814', function (obj) {
-			elem = document.getElementsByClassName('fio-hacked')[0];
-			elem.innerHTML = 'Token: ' + obj.token;
-			console.log(obj);
+		callAPIFunction(user, pass, 'token', '', function (obj) {
+			token = obj.token;
+
+			callAPIFunction(user, pass, '', token, function (obj) { // '' meens 'customer-resource'
+				elem = document.getElementsByClassName('fio-hacked')[0];
+				elem.innerHTML = 'Hallo ' + obj.name.split(' ')[0] + ', diese Immobilien empfehle ich dir:';
+
+				console.log('IBAN: '+obj.accounts[0].iban);
+				console.log('Amount: '+obj.accounts[0].amount);
+				console.log(obj);
+			});
 		});
 	}
 }
