@@ -10,7 +10,7 @@ var user = 'HackathonSep6', // IBAN DE68100100100625019119
 
 function scoring(content) {
 	'use strict';
-	var i, j, transaction, amount, balance = 0, purpose;
+	var i, j, transaction, amount, purpose, balance = 0, children = 0, rent = 0, car = 0;
 
 	for (i = 0; i < content.length; ++i) {
 		transaction = content[i];
@@ -25,10 +25,22 @@ function scoring(content) {
 
 		if (amount > 0) {
 //			console.log(amount+' '+transaction.currency+' '+ purpose);
+			children += purpose.indexOf('Familienkasse Kindergeld') > -1 ? 1 : 0;
+		} else {
+			rent = Math.max(rent, purpose.indexOf('Miete') > -1 ? Math.abs(amount) : 0);
+			car += purpose.indexOf('Aral') > -1 ? 1 : 0;
+			car += purpose.indexOf('Shell') > -1 ? 1 : 0;
+			car += purpose.indexOf('Total') > -1 ? 1 : 0;
+			car += purpose.indexOf('Esso') > -1 ? 1 : 0;
+			car += purpose.indexOf('Avia') > -1 ? 1 : 0;
+			car += purpose.indexOf('Jet') > -1 ? 1 : 0;
 		}
 	}
 
 	console.log('Balance: ' + balance);
+	console.log('Children: ' + children);
+	console.log('Rent: ' + rent);
+	console.log('Car: ' + car);
 }
 
 function callAPIFunction(username, password, action, token, func) {
