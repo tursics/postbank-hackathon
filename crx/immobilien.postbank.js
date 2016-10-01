@@ -1,113 +1,17 @@
-var destination = document.getElementsByClassName("fio-25").length;//item(0);
-//console.log("Destination: " + destination);
+function injectSeachPanel() {
+	'use strict';
+	var dists, elem;
 
-/*var distancesObserver = new MutationObserver(function (mutations) {
-	mutations.forEach(function (mutation) {
-		var i, j, addedNode, attribute, hotelItem, hotelId;
-		for (i = 0; i < mutation.addedNodes.length; i++) {
-			addedNode = mutation.addedNodes[i];
-			if (addedNode.getAttribute("class") && addedNode.getAttribute("class").indexOf("distances") > -1) {
-				for (j = 0; j < mutation.target.attributes.length; ++j) {
-					attribute = mutation.target.attributes[j];
-					if ('data-hotelitemurl' === attribute.nodeName) {
-						hotelItem = attribute.nodeValue;
-						hotelId = mutation.target.id;
-//						console.log("Added hotel with id [" + hotelId + "].");
-
-						getHRSHotelAddress(hotelItem, hotelId);
-					}
-				}
-			}
-		}
-	});
-});*/
-
-/*function ms2str(milliseconds) {
-	var ret = '';
-	if (milliseconds) {
-		milliseconds = parseInt(milliseconds / 1000 / 60, 10);
-		ret = milliseconds + ' min';
-	} else {
-		ret = '0 min';
+	dists = document.getElementsByClassName('fio-hacked');
+	if (dists.length === 0) {
+		elem = document.getElementsByClassName('fio-search-panel')[0];
+		elem.innerHTML += '<div class="fio-hacked" style="background:#fecb00; color:#000060;">x</div>';
 	}
-
-	return ret;
-}*/
-
-/*function injectResults(data) {
-	var hotelElement, dists, elem;
-//	console.log(data);
-
-	hotelElement = document.getElementById(data.requestId);
-//	console.log(hotelElement);
-	if (hotelElement) {
-		dists = hotelElement.getElementsByClassName('distances_centered');
-//		console.log(dists.length);
-		if (dists.length > 0) {
-			elem = dists[0];
-			elem.innerHTML += '<div class="hd train" style="background-image:url(http://www.hotelroute.org/media/icon-walk.png);background-position:6px 0;">' + ms2str(data.walkDuration) + '</div>';
-			elem.innerHTML += '<div class="hd train" style="background-image:url(http://www.hotelroute.org/media/icon-time.png);background-position:2px 0;">' + ms2str(data.travelDuration) + '</div>';
-			elem.innerHTML += '<div class="hd train" style="background-image:url(http://www.hotelroute.org/media/icon-change' + (data.numChanges <= 0 ? '1' : data.numChanges === 1 ? '2' : '3') + '.png);background-position:0px 0;">' + data.numChanges + ' umst</div>';
-		}
-	}
-}*/
-
-/*function callAPIFunction(address, hotelId) {
-	var now = new Date().getTime();
-	var url = 'http://api.hotelroute.org/queryTripSummary?to=' +
-//	var url = 'http://localhost:8080/hotelroute-web/queryTripSummary?to=' +
-		encodeURIComponent(destination) + '&from=' + encodeURIComponent(address) + '&startDate=' + now + '&endDate=' + now + '&requestId=' + hotelId;
-//	console.log(url);
-
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', url, true);
-	xhr.onload = function (e) {
-		if (xhr.readyState === 4) {
-			if (xhr.status === 200) {
-				if( '' != xhr.responseText) {
-					var response = JSON.parse(xhr.responseText);
-					injectResults(response)
-				}
-			} else {
-//				console.error(xhr.statusText);
-			}
-		}
-	};
-	xhr.onerror = function (e) {
-//		console.error(xhr.statusText);
-	};
-	xhr.send(null);
-}*/
-
-/*function scrapeHRSHotelAddress(html, hotelId)
-{
-	var div = document.createElement('div');
-	div.innerHTML = html;
-
-	var elements = div.getElementsByTagName('address');
-	for(var i=0; i<elements.length; i++) {
-		var address = elements[i];
-		callAPIFunction(address.innerHTML, hotelId);
-	}
-}*/
-
-/*function getHRSHotelAddress(hotelItem, hotelId)
-{
-	var url = 'http://www.hrs.de' + hotelItem;
-
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', url, true);
-	xhr.onload = function (e) {
-		if (xhr.readyState === 4) {
-			if (xhr.status === 200) {
-				scrapeHRSHotelAddress(xhr.responseText, hotelId);
-			}
-		}
-	};
-	xhr.send(null);
-}*/
+}
 
 var bankObserver = new MutationObserver(function (mutations) {
+	'use strict';
+
 	mutations.forEach(function (mutation) {
 		var i, addedNode, dists;
 		for (i = 0; i < mutation.addedNodes.length; i++) {
@@ -115,7 +19,9 @@ var bankObserver = new MutationObserver(function (mutations) {
 			if (addedNode) {
 				try {
 					dists = addedNode.getElementsByClassName('fio-search-panel');
-					console.log(dists);
+					if (dists.length > 0) {
+						injectSeachPanel();
+					}
 				} catch (x) {
 				}
 			}
@@ -140,32 +46,3 @@ var bankObserver = new MutationObserver(function (mutations) {
 var target = document.getElementsByClassName("content").item(0);
 var config = { childList: true, subtree: true };
 bankObserver.observe(target, config);
-
-/*function addFilter(node)
-{
-	var str = '<div class="teaser"><div id="walking" class="sliderBox clearFix">';
-	str += '<label style="width:auto;">Fußweg</label>';
-	str += '<input type="text" class="noInput" readonly style="border:none;" value="0 - 20 min">';
-	str += '<div class="slider " data-celname="Main Filter" data-celpos="5" data-celinfo="walking">';
-	str += '<div class="knobs knob1" style="left: 0px; position: relative;">&nbsp;</div>';
-	str += '<div class="knobs knob2" style="left: 170px; position: relative;">&nbsp;</div>';
-	str += '<div class="leftEl" style="width: 0px;"></div>';
-	str += '<div class="rightEl" style="width: 14px;"></div>';
-	str += '</div>';
-	str += '<div class="measure"><span class="left">0</span> <span class="right">20</span></div>';
-	str += '</div></div>';
-
-	node.insertAdjacentHTML('beforeend', str);
-	node.insertBefore(node.childNodes[node.childNodes.length-1],node.childNodes[2]);
-
-//	console.log(Filter);
-//	console.log(MultiSliderFilter);
-//	window.Filter.multiSliders.push("walking");
-//	Filter.filter.push(new MultiSliderFilter($('walking'),Filter,Filter.sliderSettings['walking']));
-//	new window.MultiSliderFilter(document.getElementById('walking'),window.Filter,{});
-//	window.HotellistEventManager;
-	console.log(chrome);
-}*/
-
-//var filter = document.getElementById("filter");
-//addFilter(filter);
