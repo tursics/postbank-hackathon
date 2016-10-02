@@ -132,10 +132,10 @@ function thinningSeachPanel() {
 		val = euro2int(elem2.innerHTML);
 
 		if (profile.amount < val) {
-			elem.style.color = '#e7908e';
+			elem.style.color = '#bbb';
 
 			elem2 = elem.getElementsByClassName('fio-item-inner')[0];
-			elem2.style.borderColor = '#e7908e';
+			elem2.style.borderColor = '#bbb';
 
 			elem2 = elem.getElementsByClassName('fio-item-gallery')[0];
 			elem2.style.opacity = 0.3;
@@ -144,7 +144,7 @@ function thinningSeachPanel() {
 			elem2.style.opacity = 0.3;
 
 			elem2 = elem.getElementsByClassName('btn-primary')[0];
-			elem2.style.backgroundColor = '#e7908e';
+			elem2.style.backgroundColor = '#bbb';
 		}
 	}
 }
