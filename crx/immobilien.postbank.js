@@ -29,7 +29,6 @@ function scoring(content) {
 		}
 
 		if (amount > 0) {
-//			console.log(amount+' '+transaction.currency+' '+ purpose);
 			profile.children += purpose.indexOf('Familienkasse Kindergeld') > -1 ? 1 : 0;
 		} else {
 			profile.rent = Math.max(profile.rent, purpose.indexOf('Miete') > -1 ? Math.abs(amount) : 0);
@@ -57,6 +56,24 @@ function int2euro(val) {
 	if (str.length > 3) {
 		str = str.substr(0, str.length - 3) + '.' + str.substr(-3);
 	}
+	if (str.length > 7) {
+		str = str.substr(0, str.length - 7) + '.' + str.substr(-7);
+	}
+	str += ' €';
+
+	return str;
+}
+
+function int2eurocent(val) {
+	'use strict';
+	var str = val.toString();
+	if (str.indexOf('.') === -1) {
+		str += '.00';
+	} else if (str.indexOf('.') === (str.length - 2)) {
+		str += '0';
+	}
+	str = str.replace('.', ',');
+
 	if (str.length > 7) {
 		str = str.substr(0, str.length - 7) + '.' + str.substr(-7);
 	}
@@ -164,6 +181,74 @@ function injectSeachPanel() {
 	}
 }
 
+function injectEstatePanel() {
+	'use strict';
+	var dists, elem, token, iban, productType, str;
+
+	dists = document.getElementsByClassName('fio-estate-hacked');
+	if (dists.length === 0) {
+		elem = document.getElementsByClassName('fio-estate-highlights')[0];
+		elem.innerHTML += '<div class="fio-estate-hacked col-xs-12 ng-scope"></div>';
+
+		callAPIFunction(user, pass, 'token', '', function (obj) {
+			token = obj.token;
+
+			callAPIFunction(user, pass, '', token, function (obj) { // '' meens 'customer-resource'
+				iban = obj.accounts[0].iban;
+				productType = obj.accounts[0].productType;
+
+				profile.amount = parseFloat(obj.accounts[0].amount) * 5;
+				profile.amount = parseInt(profile.amount / 1000, 10) * 1000;
+
+				callAPIFunction(user, pass, 'accounts/' + productType + '/' + iban + '/transactions', token, function (obj) {
+					scoring(obj.content);
+//					thinningSeachPanel();
+					console.log( profile);
+
+					var elem2 = elem.getElementsByClassName('labeled-output__value')[0];
+					var cost = euro2int(elem2.innerHTML);
+					var amount = profile.amount / 5;
+					var interest = 1.07 / 100;
+					var years = 20;
+//					var sum = (cost - amount) * (Math.pow(1 + interest, years) * interest) / (Math.pow(1 + interest, years) - 1);
+					var sum = cost / .2 * 0.0005;
+					console.log(sum);
+
+					elem = document.getElementsByClassName('fio-estate-hacked')[0];
+
+					str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12" style="100%">';
+					str += '<div class="labeled-output labeled-output_large">';
+					str += '<span class="labeled-output__label">Eigenkapital</span>';
+					str += '<span class="labeled-output__value ng-binding">' + int2euro(amount) + '</span>';
+					str += '</div></div>';
+					elem.innerHTML += str;
+
+					str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12" style="100%">';
+					str += '<div class="labeled-output labeled-output_large" style="background: #ced6e4;">';
+					str += '<span class="labeled-output__label">Aktuelle Miete</span>';
+					str += '<span class="labeled-output__value ng-binding">' + int2eurocent(profile.rent) + '</span>';
+					str += '</div></div>';
+					elem.innerHTML += str;
+
+					str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12">';
+					str += '<div class="labeled-output labeled-output_large" style="background: #ced6e4;">';
+					str += '<span class="labeled-output__label">Mögliche Rate</span>';
+					str += '<span class="labeled-output__value ng-binding">' + int2eurocent(sum) + '</span>';
+					str += '</div></div>';
+					elem.innerHTML += str;
+
+					str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12">';
+					str += '<div class="labeled-output labeled-output_large">';
+					str += '<span class="labeled-output__label">Laufzeit</span>';
+					str += '<span class="labeled-output__value ng-binding">' + years + ' Jahre</span>';
+					str += '</div></div>';
+					elem.innerHTML += str;
+				});
+			});
+		});
+	}
+}
+
 var bankObserver = new MutationObserver(function (mutations) {
 	'use strict';
 
@@ -181,23 +266,13 @@ var bankObserver = new MutationObserver(function (mutations) {
 					if (dists.length > 0) {
 						thinningSeachPanel();
 					}
+					dists = addedNode.getElementsByClassName('fio-estate-highlights');
+					if (dists.length > 0) {
+						injectEstatePanel();
+					}
 				} catch (x) {
 				}
 			}
-/*			if (addedNode.getAttribute("data-hpos"))
-			{
-				var hotelNode = addedNode;
-				var hotelId = hotelNode.getAttribute("id");
-				var dists = hotelNode.getElementsByClassName('distances_centered');
-//				console.log("Added hotel with id [" + hotelId + "].");
-
-				if(dists.length > 0) {
-					var hotelItem = hotelNode.getAttribute("data-hotelitemurl");
-					getHRSHotelAddress(hotelItem,hotelId);
-				}
-
-				distancesObserver.observe(hotelNode, { childList: true });
-			}*/
 		}
 	});
 });
