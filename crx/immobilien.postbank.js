@@ -50,6 +50,21 @@ function euro2int(str) {
 	return parseInt(ret, 10);
 }
 
+function int2euro(val) {
+	'use strict';
+	var str = val.toString();
+
+	if (str.length > 3) {
+		str = str.substr(0, str.length - 3) + '.' + str.substr(-3);
+	}
+	if (str.length > 7) {
+		str = str.substr(0, str.length - 7) + '.' + str.substr(-7);
+	}
+	str += ' €';
+
+	return str;
+}
+
 function callAPIFunction(username, password, action, token, func) {
 	'use strict';
 	var url, xhr;
@@ -99,7 +114,7 @@ function thinningSeachPanel() {
 		elem2 = elem.getElementsByClassName('labeled-output__value')[0];
 		val = euro2int(elem2.innerHTML);
 
-		if ((profile.amount * 5) < val) {
+		if (profile.amount < val) {
 			elem.style.color = '#e7908e';
 
 			elem2 = elem.getElementsByClassName('fio-item-inner')[0];
@@ -133,11 +148,12 @@ function injectSeachPanel() {
 				iban = obj.accounts[0].iban;
 				productType = obj.accounts[0].productType;
 
-				profile.amount = parseFloat(obj.accounts[0].amount);
+				profile.amount = parseFloat(obj.accounts[0].amount) * 5;
+				profile.amount = parseInt(profile.amount / 1000, 10) * 1000;
 
 				elem = document.getElementsByClassName('fio-hacked')[0];
 				elem.innerHTML = 'Hallo ' + obj.name.split(' ')[0] + ', diese Immobilien empfehle ich dir:<br>';
-//				elem.innerHTML += '(aktueller Kontostand: ' + profile.amount.toString().replace('.', ',') + ' Euro)';
+				elem.innerHTML += '<span style="color: #5d4800; font-size: 13px; text-shadow: none; font-weight: 500;">(dein Limit sollte bei ' + int2euro(profile.amount) + ' liegen)</span>';
 
 				callAPIFunction(user, pass, 'accounts/' + productType + '/' + iban + '/transactions', token, function (obj) {
 					scoring(obj.content);
@@ -160,6 +176,10 @@ var bankObserver = new MutationObserver(function (mutations) {
 					dists = addedNode.getElementsByClassName('fio-search-panel');
 					if (dists.length > 0) {
 						injectSeachPanel();
+					}
+					dists = addedNode.getElementsByClassName('ng-isolate-scope');
+					if (dists.length > 0) {
+						thinningSeachPanel();
 					}
 				} catch (x) {
 				}
