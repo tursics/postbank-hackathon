@@ -181,6 +181,67 @@ function injectSeachPanel() {
 	}
 }
 
+function thinningEstatePanel() {
+	'use strict';
+	var elem, elem2, cost, amount, interest, years, sum, str;
+
+	elem = document.getElementsByClassName('fio-estate-highlights')[0];
+	elem2 = elem.getElementsByClassName('labeled-output__value')[0];
+
+	cost = euro2int(elem2.innerHTML);
+	amount = profile.amount / 5;
+	interest = 1.07 / 100;
+	years = 20;
+//	sum = (cost - amount) * (Math.pow(1 + interest, years) * interest) / (Math.pow(1 + interest, years) - 1);
+	sum = cost / 0.2 * 0.0005;
+
+	elem = document.getElementsByClassName('fio-estate-hacked')[0];
+
+	str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12" style="100%">';
+	str += '<div class="labeled-output labeled-output_large">';
+	str += '<span class="labeled-output__label">Eigenkapital</span>';
+	str += '<span class="labeled-output__value ng-binding">' + int2euro(amount) + '</span>';
+	str += '</div></div>';
+	elem.innerHTML += str;
+
+	str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12" style="100%">';
+	str += '<div class="labeled-output labeled-output_large" style="background: #ced6e4;">';
+	str += '<span class="labeled-output__label">Aktuelle Miete</span>';
+	str += '<span class="labeled-output__value ng-binding">' + int2eurocent(profile.rent) + '</span>';
+	str += '</div></div>';
+	elem.innerHTML += str;
+
+	str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12">';
+	str += '<div class="labeled-output labeled-output_large" style="background: #ced6e4;">';
+	str += '<span class="labeled-output__label">Mögliche Rate</span>';
+	str += '<span class="labeled-output__value ng-binding">' + int2eurocent(sum) + '</span>';
+	str += '</div></div>';
+	elem.innerHTML += str;
+
+	str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12">';
+	str += '<div class="labeled-output labeled-output_large">';
+	str += '<span class="labeled-output__label">Laufzeit</span>';
+	str += '<span class="labeled-output__value ng-binding">' + years + ' Jahre</span>';
+	str += '</div></div>';
+	elem.innerHTML += str;
+}
+
+function thinningPOIPanel() {
+	'use strict';
+	var elem, elem2;
+
+	elem = document.getElementsByClassName('fio-lageplan-nav')[0];
+
+	elem2 = elem.getElementsByTagName('li')[0];
+	elem2.style.opacity = profile.car > 0 ? 1 : 0;
+
+	elem2 = elem.getElementsByTagName('li')[2];
+	elem2.style.opacity = profile.children > 0 ? 1 : 0;
+
+	elem2 = elem.getElementsByTagName('li')[4];
+	elem2.style.opacity = profile.children > 0 ? 1 : 0;
+}
+
 function injectEstatePanel() {
 	'use strict';
 	var dists, elem, token, iban, productType, str;
@@ -202,47 +263,8 @@ function injectEstatePanel() {
 
 				callAPIFunction(user, pass, 'accounts/' + productType + '/' + iban + '/transactions', token, function (obj) {
 					scoring(obj.content);
-//					thinningSeachPanel();
-					console.log( profile);
-
-					var elem2 = elem.getElementsByClassName('labeled-output__value')[0];
-					var cost = euro2int(elem2.innerHTML);
-					var amount = profile.amount / 5;
-					var interest = 1.07 / 100;
-					var years = 20;
-//					var sum = (cost - amount) * (Math.pow(1 + interest, years) * interest) / (Math.pow(1 + interest, years) - 1);
-					var sum = cost / .2 * 0.0005;
-					console.log(sum);
-
-					elem = document.getElementsByClassName('fio-estate-hacked')[0];
-
-					str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12" style="100%">';
-					str += '<div class="labeled-output labeled-output_large">';
-					str += '<span class="labeled-output__label">Eigenkapital</span>';
-					str += '<span class="labeled-output__value ng-binding">' + int2euro(amount) + '</span>';
-					str += '</div></div>';
-					elem.innerHTML += str;
-
-					str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12" style="100%">';
-					str += '<div class="labeled-output labeled-output_large" style="background: #ced6e4;">';
-					str += '<span class="labeled-output__label">Aktuelle Miete</span>';
-					str += '<span class="labeled-output__value ng-binding">' + int2eurocent(profile.rent) + '</span>';
-					str += '</div></div>';
-					elem.innerHTML += str;
-
-					str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12">';
-					str += '<div class="labeled-output labeled-output_large" style="background: #ced6e4;">';
-					str += '<span class="labeled-output__label">Mögliche Rate</span>';
-					str += '<span class="labeled-output__value ng-binding">' + int2eurocent(sum) + '</span>';
-					str += '</div></div>';
-					elem.innerHTML += str;
-
-					str = '<div class="fio-estate-higlight-item fio-col-md-3 fio-col-sm-6 fio-col-xs-12">';
-					str += '<div class="labeled-output labeled-output_large">';
-					str += '<span class="labeled-output__label">Laufzeit</span>';
-					str += '<span class="labeled-output__value ng-binding">' + years + ' Jahre</span>';
-					str += '</div></div>';
-					elem.innerHTML += str;
+					thinningEstatePanel();
+					thinningPOIPanel();
 				});
 			});
 		});
