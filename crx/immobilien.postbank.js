@@ -232,14 +232,33 @@ function thinningPOIPanel() {
 
 	elem = document.getElementsByClassName('fio-lageplan-nav')[0];
 
-	elem2 = elem.getElementsByTagName('li')[0];
+/*	elem2 = elem.getElementsByTagName('li')[0];
 	elem2.style.opacity = profile.car > 0 ? 1 : 0;
+
+	elem2 = elem.getElementsByTagName('li')[1].getElementsByTagName('a')[0];
+//	elem2.innerHTML = '<a href="javascript:;" ng-click="map.setLayer(\'shop\')" ng-class="{ \'fio-lageplan-nav-active\': (map.currentPoi == \'shop\')}"><span class="icon fio-aerzte-icon"></span>Shops</a>';
+	elem2.innerHTML = '<span class="icon fio-aerzte-icon"></span>Shops';
 
 	elem2 = elem.getElementsByTagName('li')[2];
 	elem2.style.opacity = profile.children > 0 ? 1 : 0;
 
 	elem2 = elem.getElementsByTagName('li')[4];
-	elem2.style.opacity = profile.children > 0 ? 1 : 0;
+	elem2.style.opacity = profile.children > 0 ? 1 : 0;*/
+
+	elem2 = elem.getElementsByTagName('li')[0].getElementsByTagName('a')[0];
+	elem2.innerHTML = '<span class="icon fio-kindergarten-icon"></span>Kindergärten';
+
+	elem2 = elem.getElementsByTagName('li')[1].getElementsByTagName('a')[0];
+	elem2.innerHTML = '<span class="icon fio-schulen-icon"></span>Schulen';
+
+	elem2 = elem.getElementsByTagName('li')[2].getElementsByTagName('a')[0];
+	elem2.innerHTML = '<span class="icon fio-aerzte-icon"></span>Jugendklubs';
+
+	elem2 = elem.getElementsByTagName('li')[3].getElementsByTagName('a')[0];
+	elem2.innerHTML = '<span class="icon fio-shopping-icon"></span>Lebensmittel';
+
+	elem2 = elem.getElementsByTagName('li')[4].getElementsByTagName('a')[0];
+	elem2.innerHTML = '<span class="icon fio-oepvn-icon"></span>Bus und Bahn';
 }
 
 function injectEstatePanel() {
